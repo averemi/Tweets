@@ -10,7 +10,10 @@ import UIKit
 import Foundation
 
 
+
 class ViewController: UIViewController {
+    
+
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,6 +31,8 @@ class ViewController: UIViewController {
             guard let data = "\(CUSTOMER_KEY):\(CUSTOMER_SECRET)".data(using: .utf8) else { return nil }
             let base64 =  data.base64EncodedData(options: Data.Base64EncodingOptions(rawValue: 0))
             return String(data: base64, encoding: .utf8)
+            
+
         }
         
         guard let bearer = BEARER else { return }
