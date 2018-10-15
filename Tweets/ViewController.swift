@@ -11,14 +11,24 @@ import Foundation
 
 
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, APITwitterDelegate {
     
 
 
     override func viewDidLoad() {
         super.viewDidLoad()
         makeRequest()
+        let ap = APIController(token: "AAAAAAAAAAAAAAAAAAAAAGmz8gAAAAAA7XEWSlp7b%2F4UbcwI6e2rgUiVXKQ%3DMkWcj3KSVwvyORV3GKrp4Ttqc1w6gYxnSF5bNMpKrfKfWO2kGP") // test
+        ap.searchTweets(keyword: "42") // test
         // Do any additional setup after loading the view, typically from a nib.
+    }
+    
+    func processErrors(error: Error) {
+        <#code#>
+    }
+    
+    func processTweets(tweets: [Tweet]) {
+        <#code#>
     }
 
 
@@ -31,8 +41,6 @@ class ViewController: UIViewController {
             guard let data = "\(CUSTOMER_KEY):\(CUSTOMER_SECRET)".data(using: .utf8) else { return nil }
             let base64 =  data.base64EncodedData(options: Data.Base64EncodingOptions(rawValue: 0))
             return String(data: base64, encoding: .utf8)
-            
-
         }
         
         guard let bearer = BEARER else { return }

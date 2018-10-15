@@ -14,7 +14,7 @@ struct Tweet: CustomStringConvertible {
     let text : String
     
     var description: String {
-        return "(\(name): \(text))"
+        return "NAME: (\(name): TEXT: \(text))"
     }
     
 }

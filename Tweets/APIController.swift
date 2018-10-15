@@ -28,10 +28,14 @@ class APIController {
         self.delegate = delegate
     }
     
+    init(token : String) {
+        self.token = token
+    }
+    
     func searchTweets(keyword : String) {
         
         guard let keywordEncoded = keyword.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else { return }
-        guard let url = URL(string: "\(SEARCH_URL)?lang=en&count=100&q=\(keywordEncoded)") else { return }
+        guard let url = URL(string: "\(SEARCH_URL)?lang=en&count=10&q=\(keywordEncoded)") else { return }
         var request = URLRequest(url: url)
         
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
@@ -46,15 +50,27 @@ class APIController {
             else if let d = data {
                 print("DATA: \(d)")
                 do {
-                  //      if let result = try JSONDecoder().decode([String : String]?.self, from: d) {
-                    //        print("JSON DECODED: \(result)")
-                        //    self.delegate?.processTweets(tweet: )
-                      //  } // <- this is option 1 of converting the data
+                  /*    if let result = try JSONDecoder().decode([String : String]?.self, from: d) {
+                            print("JSON DECODED: \(result)")
+                        } // <- this is option 1 of converting the data*/
                     if let resp : NSDictionary = try JSONSerialization.jsonObject(with: d, options: JSONSerialization.ReadingOptions.mutableContainers) as? NSDictionary {
-                            print("JSON DECODED: \(resp)")
-                     //       tweets =
-                        
-                        
+                        if let statuses = resp["statuses"] as? [[String : AnyObject]] {
+                            for dictArray in statuses {
+                                
+                                if let text = dictArray["text"] as? String, let userName = dictArray["user"]?["name"] as? String {
+                                    
+                                //      print("TEXT: \(text)")
+                                //      print("USER: \(userName)")
+                                //      print()
+                                //      print()
+                                //      print()
+                                    
+                                    self.tweets.append(Tweet(name: userName, text: text))
+                                }
+                            }
+                            self.delegate?.processTweets(tweets: self.tweets)
+                            
+                        }
                     } // <- this is option 2 of converting the data
                 }
                 catch (let err) {
