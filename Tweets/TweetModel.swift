@@ -12,9 +12,10 @@ struct Tweet: CustomStringConvertible {
     
     let name : String
     let text : String
+    let date : String
     
     var description: String {
-        return "NAME: (\(name): TEXT: \(text))"
+        return "NAME: \(name): DATE: \(date) TEXT: \(text)"
     }
     
 }

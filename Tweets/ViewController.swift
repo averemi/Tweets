@@ -11,24 +11,86 @@ import Foundation
 
 
 
-class ViewController: UIViewController, APITwitterDelegate {
+class ViewController: UIViewController, APITwitterDelegate, UITableViewDataSource, UITableViewDelegate, UISearchBarDelegate {
     
-
-
+    var tweetz : [Tweet] = []
+    var token : String?
+    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var searchBar: UISearchBar!
+    
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        searchBar.delegate = self
         makeRequest()
-        let ap = APIController(token: "AAAAAAAAAAAAAAAAAAAAAGmz8gAAAAAA7XEWSlp7b%2F4UbcwI6e2rgUiVXKQ%3DMkWcj3KSVwvyORV3GKrp4Ttqc1w6gYxnSF5bNMpKrfKfWO2kGP") // test
-        ap.searchTweets(keyword: "42") // test
         // Do any additional setup after loading the view, typically from a nib.
     }
     
+    func requestTweets(keyword: String) {
+        if let token = self.token {
+            let ap = APIController(delegate: self, token: token)
+            ap.searchTweets(keyword: keyword) // test
+        }
+    }
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        if searchBar.text != "" {
+            if let keyword = searchBar.text {
+                requestTweets(keyword: keyword)
+            }
+        }
+    }
+    
+    
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return 1
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return tweetz.count
+    }
+    
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "tweetCell") as! TweetTableViewCell
+        cell.nameLabel?.text = tweetz[indexPath.row].name
+        cell.tweetLabel?.text = tweetz[indexPath.row].text
+        cell.dateLabel?.text = tweetz[indexPath.row].date
+        cell.nameLabel?.numberOfLines = 0
+        cell.tweetLabel?.numberOfLines = 0
+        cell.dateLabel?.numberOfLines = 0
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = 44.0
+        
+        cell.backgroundColor = UIColor.white
+        cell.layer.borderWidth = 0.5
+        return cell
+    }
+    
     func processErrors(error: Error) {
-        <#code#>
+        let myAlert = UIAlertController(title: "Alert", message: "Error loading the data occured.", preferredStyle: UIAlertController.Style.alert)
+        
+        let okAction = UIAlertAction(title: "Ok", style: UIAlertAction.Style.default, handler: nil)
+        
+        myAlert.addAction(okAction)
+        
+        self.present(myAlert, animated: true, completion: nil)
+        
+        return
     }
     
     func processTweets(tweets: [Tweet]) {
-        <#code#>
+        if !tweets.isEmpty {
+            self.tweetz = tweets
+            DispatchQueue.main.async {
+                for tweet in self.tweetz {
+                    print(tweet)
+                }
+                self.tableView.reloadData()
+           
+            }
+        }
     }
 
 
@@ -54,22 +116,23 @@ class ViewController: UIViewController, APITwitterDelegate {
             
         let task = URLSession.shared.dataTask(with: request) {
             data, response, error in
-            print("RESPONSE: \(String(describing: response))")
                 if let err = error {
-                    print("ERROR: \(err)")
+                    self.processErrors(error: err)
                 }
                 else if let d = data {
-                    print("DATA: \(d)")
                     do {
                     //    if let result = try JSONDecoder().decode([String : String]?.self, from: d) {
                     //        print("JSON DECODED: \(result)")
                     //    } // <- this is option 1 of converting the data
                         if let dict : NSDictionary = try JSONSerialization.jsonObject(with: d, options: JSONSerialization.ReadingOptions.mutableContainers) as? NSDictionary {
-                            print("JSON DECODED: \(dict)")
-                            } // <- this is option 2 of converting the data
+                          //  print("JSON DECODED: \(dict)")
+                            if let token = dict["access_token"] as? String {
+                                self.token = token
+                            }
+                        } // <- this is option 2 of converting the data
                     }
                     catch (let err) {
-                        print("ERROR: \(err)")
+                        self.processErrors(error: err)
                     }
                 }
             
@@ -77,7 +140,5 @@ class ViewController: UIViewController, APITwitterDelegate {
         task.resume()
 
     }
-    
+
 }
-
-

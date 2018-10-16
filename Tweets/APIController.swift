@@ -28,14 +28,10 @@ class APIController {
         self.delegate = delegate
     }
     
-    init(token : String) {
-        self.token = token
-    }
-    
     func searchTweets(keyword : String) {
         
         guard let keywordEncoded = keyword.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else { return }
-        guard let url = URL(string: "\(SEARCH_URL)?lang=en&count=10&q=\(keywordEncoded)") else { return }
+        guard let url = URL(string: "\(SEARCH_URL)?lang=en&count=100&q=\(keywordEncoded)") else { return }
         var request = URLRequest(url: url)
         
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
@@ -43,12 +39,10 @@ class APIController {
         
         let task = URLSession.shared.dataTask(with: request) {
             data, response, error in
-            print("RESPONSE: \(String(describing: response))")
             if let err = error {
-                print("ERROR: \(err)")
+                self.delegate?.processErrors(error: err)
             }
             else if let d = data {
-                print("DATA: \(d)")
                 do {
                   /*    if let result = try JSONDecoder().decode([String : String]?.self, from: d) {
                             print("JSON DECODED: \(result)")
@@ -57,24 +51,25 @@ class APIController {
                         if let statuses = resp["statuses"] as? [[String : AnyObject]] {
                             for dictArray in statuses {
                                 
-                                if let text = dictArray["text"] as? String, let userName = dictArray["user"]?["name"] as? String {
+                                if let text = dictArray["text"] as? String, let userName = dictArray["user"]?["name"] as? String, let dateString = dictArray["created_at"] as? String {
                                     
-                                //      print("TEXT: \(text)")
-                                //      print("USER: \(userName)")
-                                //      print()
-                                //      print()
-                                //      print()
-                                    
-                                    self.tweets.append(Tweet(name: userName, text: text))
+                                    let dateFormatter = DateFormatter()
+                                    dateFormatter.dateFormat = "E MMM dd HH:mm:ss Z yyyy"
+                                    if let date = dateFormatter.date(from: dateString) {
+                                        dateFormatter.dateFormat = "dd/MM/yyyy HH:mm"
+                                        let newDateString = dateFormatter.string(from: date)
+                                        
+                                        self.tweets.append(Tweet(name: userName, text: text, date: newDateString))
+                                    }
                                 }
                             }
+                            
                             self.delegate?.processTweets(tweets: self.tweets)
                             
                         }
                     } // <- this is option 2 of converting the data
                 }
                 catch (let err) {
-                    print("ERROR: \(err)")
                     self.delegate?.processErrors(error: err)
                 }
             }
@@ -85,22 +80,3 @@ class APIController {
         
     }
 }
-
-/*
- if let tweetsD: [NSDictionary] = resp["statuses"] as? [NSDictionary] {
- for tweet in tweetsD {
- if let name = tweet["user"]?["name"] as? String {
- if let text = tweet["text"] as? String {
- if let date = tweet["created_at"] as? String {
- let dateFormatter = NSDateFormatter()
- dateFormatter.dateFormat = "E MMM dd HH:mm:ss Z yyyy"
- if let date = dateFormatter.dateFromString(date) {
- dateFormatter.dateFormat = "dd/MM/yyyy HH:mm"
- let newDate = dateFormatter.stringFromDate(date)
- tweets.append(Tweet(name: name, text: text, date: newDate))
- }
- }
- }
- }
- */
-
