@@ -77,6 +77,5 @@ class APIController {
         }
         task.resume()
 
-        
     }
 }
