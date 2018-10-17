@@ -9,15 +9,6 @@
 import UIKit
 import Foundation
 
-/*
- TO DO:
- 
- 1) make keyboard hide on iPhone SE
- 2) make little loading icon while loading in the upper part of the screen
- 
- 
- 
- */
 
 class ViewController: UIViewController, APITwitterDelegate, UITableViewDataSource, UITableViewDelegate, UISearchBarDelegate {
     
@@ -38,7 +29,7 @@ class ViewController: UIViewController, APITwitterDelegate, UITableViewDataSourc
     func requestTweets(keyword: String) {
         if let token = self.token {
             let ap = APIController(delegate: self, token: token)
-            ap.searchTweets(keyword: keyword) // test
+            ap.searchTweets(keyword: keyword)
         }
     }
     
@@ -47,13 +38,13 @@ class ViewController: UIViewController, APITwitterDelegate, UITableViewDataSourc
             if let keyword = searchBar.text {
                 requestTweets(keyword: keyword)
             }
-      //      searchBar.endEditing(false)
+            searchBar.endEditing(false)
         }
         
     }
     
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
-    //    searchBar.endEditing(false)
+        searchBar.endEditing(false)
     }
     
     
@@ -93,6 +84,7 @@ class ViewController: UIViewController, APITwitterDelegate, UITableViewDataSourc
         
         return
     }
+    
     
     func processTweets(tweets: [Tweet]) {
         if !tweets.isEmpty {
